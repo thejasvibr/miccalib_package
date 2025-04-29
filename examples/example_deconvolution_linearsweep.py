@@ -46,8 +46,9 @@ plt.plot(audio)
 
 #%% Find the first big peak, and suppress all other peaks
 peaks_IR, _ = signal.find_peaks(impulse_resp,
-                                             height=np.percentile(impulse_resp, 99),
-                                             distance=int(fs*0.5e-3))
+                                height=np.percentile(impulse_resp, 99),
+                                distance=int(fs*0.5e-3))
+
 directpath_IR = peaks_IR.copy()
 valid_samples = np.arange(peaks_IR[0]-20, peaks_IR[0]+20, )
 cleaned_impulseresp = np.zeros(impulse_resp.size)
