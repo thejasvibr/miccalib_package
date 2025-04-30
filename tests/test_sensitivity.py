@@ -1,15 +1,11 @@
-#!/usr/bin/env python
-
-"""Tests for `miccalib` package."""
+# -*- coding: utf-8 -*-
+"""Tests for sensitivty module of the `miccalib` package."""
 
 
 import unittest
-from click.testing import CliRunner
 
 import miccalib 
-from miccalib.deconvolution import deconvolve_linearchirp
-from miccalib.deconvolution import convolve_linearchirp
-from miccalib.utilities import dB, RMS, powerspec
+from miccalib.sensitivity import *
 import scipy.signal as signal 
 import numpy as np 
 import matplotlib.pyplot as plt

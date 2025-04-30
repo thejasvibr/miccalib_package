@@ -18,8 +18,8 @@ import scipy.signal as signal
 calibmic_rec = os.path.join('example_data',
                             'GRAS_playback_240819_0330.wav')
 fs = sf.info(calibmic_rec).samplerate
-#t_start, t_stop = 9.105, 9.120 # 7 ms sweep
-t_start, t_stop = 8.895, 8.915 # 5 ms sweep
+t_start, t_stop = 9.105, 9.120 # 7 ms sweep
+#t_start, t_stop = 8.895, 8.915 # 5 ms sweep
 #t_start, t_stop = 8.695, 8.710 # 3 ms sweep
 
 audio, fs = sf.read(calibmic_rec,
@@ -27,7 +27,7 @@ audio, fs = sf.read(calibmic_rec,
 audio = audio[:,0]
 
 freq_start, freq_stop = 15e3, 200
-sweep_duration = 5e-3
+sweep_duration = 7e-3
 samples_sweep = int(fs*sweep_duration)
 sweep_rate = (freq_stop - freq_start)/sweep_duration
 

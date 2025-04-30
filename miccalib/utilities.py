@@ -5,7 +5,7 @@ Utility functions to do various measurements
 Some of these functions are translations of Kristian Beedlholm's
 MATLAB code.
 
-@author: Thejasvi & Lena de Framond
+@author: Thejasvi Beleyur & Lena de Framond
 """
 import numpy as np 
 import matplotlib.pyplot as plt
@@ -19,32 +19,38 @@ def normalize_energy(audio):
     norm = audio/np.sqrt(np.sum(audio**2))
     return norm
 
-def Cleansweep (modsig, modu):
-
-    G2 = fft.fft(modsig)
-    modsig2=np.real(fft.ifft(G2*np.flip(modu)))*2
-
-    return modsig2
-
-
-def Energy (audio):
+def energy(audio):
     return np.sum(audio**2)
 
 def RMS(x):
     # calculate root mean square
-    rms = np.sqrt(np.mean(x*x))
-    return(rms)
+    rms = np.sqrt(np.mean(x**2))
+    return rms
 
-def dB(x, ref=None):
-    if ref==None:
-        ref= 1
+def dB(x, **kwargs):
+    '''
+    Parameters
+    ----------
+    x : float
+        A value that must be brought to the decibel scale
+    ref : float, optional
+        A reference value to use in the decibel scale. Defaults to 1.
+
+    Returns 
+    -------
+    dBx : float
+        X in the decibel scale with a custom reference value if given.
+    '''
+    ref = kwargs.get('ref', 1)
     dBx = 20*np.log10(x/ref)
     return dBx
 
-def undB(x, ref=None):
-    if ref==None:
-        ref= 1
-    dBx = ref * 10**(x/20)
+def undB(x, **kwargs):
+    '''The opposite of the dB function.
+    Brings measurements from decibels to a linear scale.
+    '''
+    ref = kwargs.get('ref', 1)
+    dBx = ref*10**(x/20)
     return dBx
 
 def DiffSpecs (spec_Gras_dB, f_g, spec_Sweep_dB, f_s):

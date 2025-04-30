@@ -1,12 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-Deconvolution functions 
+De-&-convolution functions 
 -----------------------
-To generate cleaner, reflection-free estimates of mic sensitivity
+Deconvolution and convolution functions to generate cleaner, reflection-free
+estimates of known playback signals. The general steps are to:
+    
+    1. Identify where the signals are detected in time as an 'impulse response' (direct path & reflections)
+    2. Clean the 'impulse response' manually to suppress all reflections, and keep only the direct path
+    3. Convolve the cleaned impulse response with the known signal to get the reflection-free, deconvolved audio
 
-Created on Mon Apr 28 14:04:36 2025
 
-@author: theja
+Code origins
+~~~~~~~~~~~~
+deconvolve_linearchirp & convolve_linearchirp were adapted by TB 
+based on Lena de Framond's translation of Kristian Beedlholm's MATLAB code. 
+
+@author: Thejasvi Beleyur, Lena de Framond, 2025
 """
 import numpy as np 
 from scipy import fft
@@ -74,7 +83,7 @@ def convolve_linearchirp(modsig, modu):
 
     See Also
     --------   
-    miccalib.deconvolution.deconvolve_linearchirp     
+    miccalib.deconvolution.deconvolve_linearchirp    
     '''
     G2 = fft.fft(modsig)
     modsig2=np.real(fft.ifft(G2*np.flip(modu)))*2
