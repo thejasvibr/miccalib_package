@@ -1,3 +1,4 @@
+https://github.com/thejasvibr/miccalib_package.git@master
 matplotlib
 numpy
 pandas
