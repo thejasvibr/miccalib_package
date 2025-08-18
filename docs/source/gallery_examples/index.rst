@@ -17,10 +17,10 @@ Here are some examples for the :code:`miccalib` package
 
 .. only:: html
 
-  .. image:: /gallery_examples/images/thumb/sphx_glr_example_deconvolution_linearsweep_thumb.png
+  .. image:: /gallery_examples/images/thumb/sphx_glr_1_example_deconvolution_linearsweep_thumb.png
     :alt:
 
-  :ref:`sphx_glr_gallery_examples_example_deconvolution_linearsweep.py`
+  :ref:`sphx_glr_gallery_examples_1_example_deconvolution_linearsweep.py`
 
 .. raw:: html
 
@@ -34,10 +34,10 @@ Here are some examples for the :code:`miccalib` package
 
 .. only:: html
 
-  .. image:: /gallery_examples/images/thumb/sphx_glr_example_freqsensitivity_thumb.png
+  .. image:: /gallery_examples/images/thumb/sphx_glr_plot_example_freqsensitivity_thumb.png
     :alt:
 
-  :ref:`sphx_glr_gallery_examples_example_freqsensitivity.py`
+  :ref:`sphx_glr_gallery_examples_plot_example_freqsensitivity.py`
 
 .. raw:: html
 
@@ -55,8 +55,8 @@ Here are some examples for the :code:`miccalib` package
 .. toctree::
    :hidden:
 
-   /gallery_examples/example_deconvolution_linearsweep
-   /gallery_examples/example_freqsensitivity
+   /gallery_examples/1_example_deconvolution_linearsweep
+   /gallery_examples/plot_example_freqsensitivity
 
 
 .. only:: html

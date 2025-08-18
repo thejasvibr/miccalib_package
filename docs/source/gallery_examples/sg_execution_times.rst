@@ -6,7 +6,7 @@
 
 Computation times
 =================
-**00:00.000** total execution time for 1 file **from gallery_examples**:
+**00:02.428** total execution time for 2 files **from gallery_examples**:
 
 .. container::
 
@@ -32,6 +32,9 @@ Computation times
    * - Example
      - Time
      - Mem (MB)
-   * - :ref:`sphx_glr_gallery_examples_example_deconvolution_linearsweep.py` (``example_deconvolution_linearsweep.py``)
+   * - :ref:`sphx_glr_gallery_examples_plot_example_freqsensitivity.py` (``plot_example_freqsensitivity.py``)
+     - 00:02.428
+     - 0.0
+   * - :ref:`sphx_glr_gallery_examples_1_example_deconvolution_linearsweep.py` (``1_example_deconvolution_linearsweep.py``)
      - 00:00.000
      - 0.0

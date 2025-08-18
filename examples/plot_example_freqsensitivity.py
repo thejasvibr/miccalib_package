@@ -29,6 +29,8 @@ import pandas as pd
 import os 
 import scipy.signal as signal
 #%%
+# Load audio and remove reflections
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 linearsweep_props = {'freq_start': 15e3, 'freq_stop':200, 'sweep_duration':7e-3}
 
 # load and align the sweep from the calibration mic
@@ -46,16 +48,23 @@ calibmic_cleanedsweep, (calib_impresp, calib_invsweep) = eliminate_reflections_l
                                                                       fs,
                                                                       linearsweep_props,
                                                                       )
-plt.figure()
+plt.figure(figsize=(4,7))
 plt.subplot(411)
-plt.specgram(calibmic_cleanedsweep, Fs=fs, NFFT=256, noverlap=200)
-plt.subplot(412)
+plt.title('Calibration mic sweep - raw audio')
 plt.specgram(calibmic_audio, Fs=fs, NFFT=256, noverlap=200)
-plt.subplot(413)
-plt.plot(calibmic_cleanedsweep,)
-plt.subplot(414)
+plt.subplot(412)
 plt.plot(calibmic_audio, )
-#%% load and align the sweep from the target microphone 
+plt.xticks([])
+plt.subplot(413)
+plt.title('Calibration mic sweep - w/o reflections')
+plt.specgram(calibmic_cleanedsweep, Fs=fs, NFFT=256, noverlap=200)
+plt.subplot(414)
+plt.plot(calibmic_cleanedsweep,)
+plt.show()
+
+#%%
+# Load and align the sweep from the target microphone 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 t_start, t_stop = 6.825, 6.845 # seconds
 tgt_mic_file = os.path.join('example_data','SennheiserMKE_240819_0325.wav')
 tgtmic_audio_stereo, fs = sf.read(tgt_mic_file,
@@ -69,15 +78,19 @@ tgt_cleanedaudio, (tgt_impresp, tgt_invsweep) = eliminate_reflections_linchirp(t
                                                                       linearsweep_props,
                                                                       )
 
-plt.figure()
+plt.figure(figsize=(4,7))
 plt.subplot(411)
-plt.specgram(tgt_cleanedaudio, Fs=fs, NFFT=256, noverlap=200)
+plt.title('Target mic sweep - raw audio')
+plt.plot(tgtmic_audio,)
 plt.subplot(412)
 plt.specgram(tgtmic_audio, Fs=fs, NFFT=256, noverlap=200)
+plt.xticks([])
 plt.subplot(413)
-plt.plot(tgt_cleanedaudio,)
+plt.title('Calibration mic sweep - w/o reflections')
+plt.plot(tgt_cleanedaudio, )
 plt.subplot(414)
-plt.plot(tgtmic_audio, )
+plt.specgram(tgt_cleanedaudio, Fs=fs, NFFT=256, noverlap=200)
+plt.show()
 #%%
 linear_chirp = make_linear_sweep(linearsweep_props['sweep_duration'], fs, 
                                  (linearsweep_props['freq_start'],
@@ -85,68 +98,82 @@ linear_chirp = make_linear_sweep(linearsweep_props['sweep_duration'], fs,
 tgtmic_onlysweep = cut_out_playback(tgt_cleanedaudio, linear_chirp)
 calibmic_onlysweep = cut_out_playback(calibmic_cleanedsweep, linear_chirp)
 
-plt.figure()
+plt.figure(figsize=(4,4))
+plt.title('Linear sweeps w/o reflections')
 plt.plot(tgtmic_onlysweep, label='target mic')
 plt.plot(calibmic_onlysweep, label='calibration mic')
 plt.legend()
+plt.show()
+
+#%% 
+# Calibration tone: connecting a.u. RMS to Pascals 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# How do we connect the calibration mic's a.u. rms to 'real-world' Pascals?
+# We will do it using a calibrator that produces a 1 kHz tone at 1 Pa sound pressure. 
+# The cool thing about the the GRAS mic used here is that it has a very flat frequency response across a wide
+# range of frequncies (+/- 1-2 dB from audible to ultrasound range). The a.u. rms/Pa sensitivity 
+# at 1 kHz can be fairly approximated to be the same up to 100 kHz!
+
 #%%
-# And now let's calculate the spectral RMS levels from the calibration microphone
-# First compensate for the gain settings in both mics
-rec_params = pd.read_excel(os.path.join('example_data',
-                                        '2024-08-19_recalibration.xlsx'))
+# A note about 'a.u. rms'
+# ^^^^^^^^^^^^^^^^^^^^^^^
+# a.u. is short for arbitrary units. If there is 'arbitrary' in the RMS
+# it means the rms values are specific to that recorder!
 
 # Let's load the reference 1 kHz tone at 1 Pa from the calibrator 
 onePa_rec = os.path.join('example_data', 'GRAS_1Pa_240819_0331.wav')
 onePa_tone, fs = sf.read(onePa_rec)
 # band-pass with a 1st order filter between 500 and 2 kHz
-b,a = signal.butter(1, np.array([500,2e3])/(fs*0.5), 'bandpass')
+b,a = signal.butter(1, np.array([200])/(fs*0.5), 'highpass')
 onePa_tone_bp = signal.filtfilt(b,a,onePa_tone[:,0]) # only the 1st channel has audio
-
-# We know from the recording paramter notes of that day that the calibration 
-# microphone (a GRAS 1/4" mic) had a total gain of +56 dB. 
-calibmic_total_gain = 56 # dB
 calibmic_tonegain = 36
 onePa_tone_gaincomp = onePa_tone_bp*10**(-calibmic_tonegain/20)
 
-plt.figure()
-plt.plot(onePa_tone_gaincomp)
+plt.figure(figsize=(5,3))
+plt.title('Calib. mic: 1Pa tone @1 kHz (5 ms snippet)')
+plt.plot(onePa_tone_gaincomp[:int(fs*0.005)])
+plt.ylabel('Arbitrary units', fontsize=12);
+plt.show()
 
-#%% Calibration 
-# Using the calibrator we know the GRAS mic's sensitivity at 1kHz. The cool thing
-# about the gRAS mic is that it has a very flat frequency response across a wide
-# range of frequncies (+/- 1-2 dB from audible to ultrasound range). We can use this
-# property to now calculate the sound pressure level for the whole sound and across
-# frequency bands
 rms_per_Pa = rms(onePa_tone_gaincomp)
+print(f'The calibration mic has a sensitivity of: {np.around(rms_per_Pa,4)} a.u.rms/Pa')
 
-#%% Gain compensation
+#%%
+# Gain compensation
+# ~~~~~~~~~~~~~~~~~
 # Let's compensate the recordings for the gain used during recording. 
 # Why compensate? This is is because we want to be able to use the same mics
 # at any kind of gain value for this particular audio interface.
- 
+# We know from the recording paramter notes of that day that the calibration 
+# microphone (a GRAS 1/4" mic) had a total gain of +56 dB. 
+calibmic_total_gain = 56 # dB
+
 calibmic_sweep_gaincomp = calibmic_onlysweep*10**(-calibmic_total_gain/20)
 tgtmic_totalgain = 36 # dB
 tgtmic_sweep_gaincomp = tgtmic_onlysweep*10**(-tgtmic_totalgain/20)
 
 # Now see the effect of gain compensation has
-plt.figure()
+plt.figure(figsize=(7,3))
 plt.plot(tgtmic_sweep_gaincomp, label='target mic')
 plt.plot(calibmic_sweep_gaincomp, label='calibration mic')
-plt.title('Gain compensated audio')
+plt.title('Gain compensated audio');plt.ylabel('Arbitrary units', fontsize=12);
 plt.legend()
 
 #%% 
-# Power spectral density of the playback sweep
+# Power spectral density of the playback sweep - a.u. rms over frequency
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# To calculate how much energy is there in each frequency band, we will 
+# get the RMS/frequency band through an FFT using Parseval's theorem. 
 
 fftfreqs, calibfreqwise_rms = sensitivity.calc_native_freqwise_rms(calibmic_sweep_gaincomp,
                                                               fs)
 plt.figure()
 plt.plot(fftfreqs, calibfreqwise_rms)
-plt.xlabel('Frequency, Hz', fontsize=12);plt.ylabel('Power, RMS', fontsize=12)
-
+plt.xlabel('Frequency, Hz', fontsize=12);plt.ylabel('Power, a.u. RMS', fontsize=12)
+plt.title('Calib. mic: power spectrum')
 #%% 
 # We have the RMS over frequency bands, what we need is the equivalent Pascals
-# over frequency bands
+# over frequency bands: :math:`Pascals_{rms} \ across \ freqs. = \frac{signal\ RMS \ across \ freqs.}{sensitivity \ across \ freqs.}`
 
 calibfreqwise_Pa_rms = calibfreqwise_rms/rms_per_Pa
 calibfreqwise_dBSPL = dB(calibfreqwise_Pa_rms, ref=20e-6)
@@ -154,7 +181,7 @@ valid_freqrange = fftfreqs[np.logical_and(fftfreqs>=200, fftfreqs<=15e3)]
 
 plt.figure()
 a0 = plt.subplot(211)
-plt.title('Calibration mic measurements')
+plt.title('Calib.mic: sweep power spectrum')
 plt.plot(fftfreqs, calibfreqwise_Pa_rms) 
 plt.ylabel('Pressure, Pa (rms)', fontsize=12)
 a1 = plt.subplot(212, sharex=a0)
@@ -165,6 +192,8 @@ plt.ylabel('dB SPL rms, \n re 20$\mu$Pa')
 plt.xlabel('Frequency, Hz')
 
 #%%
+# Cleaning up the power-spectrum: accounting for signal windowing and calib. mic noise
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # Notice in the dB SPL plot below there are some weird peaks especially below 200 Hz 
 # The GRAS 1/4" mic used already has a noise-floor of at least 30 dB SPL. Let's
 # choose a more conservative threshold of ~40 dB, and also use the information have
@@ -177,8 +206,10 @@ above_noiselevel = calibfreqwise_dBSPL>=40
 calib_clean_powerspectrum =  calibfreqwise_Pa_rms.copy()
 calib_clean_powerspectrum[~np.logical_and(above_noiselevel, valid_freqrange)] =0
 
-plt.figure()
+plt.figure(figsize=(7,5))
 plt.plot(fftfreqs, calib_clean_powerspectrum)
+plt.xlim(1e3,16e3);plt.ylabel('Sound pressure, Pa (rms)', fontsize=12)
+plt.xlabel('Frequency, Hz', fontsize=12)
 plt.title('Cleaned power spectrum - above 40 dBSPL and within sweep range')
 #%%
 # Since we know the sound pressure for each frequency band, we can calculate
@@ -186,22 +217,26 @@ plt.title('Cleaned power spectrum - above 40 dBSPL and within sweep range')
 
 fftfreqs, tgt_freqwiserms = sensitivity.calc_native_freqwise_rms(tgtmic_sweep_gaincomp,
                                                               fs)
-
 tgtmic_sensitivity = tgt_freqwiserms/calib_clean_powerspectrum
 
-
-
 #%%
-plt.figure()
-a0 = plt.subplot(211)
-plt.plot(fftfreqs, tgtmic_sensitivity)
-plt.xlabel('Frequency, Hz'); plt.ylabel('Sensitivity, a.u.rms/Pa')
+tgtmic_sensitivity[np.isinf(tgtmic_sensitivity)] = np.nan
 
-a1 = plt.subplot(212)
+plt.figure(figsize=(7,9))
+a0 = plt.subplot(211)
+plt.text(3000, np.nanmax(tgtmic_sensitivity)-0.001,'Target mic: sensitivity', 
+         fontsize=12)
+plt.plot(fftfreqs, tgtmic_sensitivity)
+plt.ylabel('Sensitivity, a.u.rms/Pa')
+plt.xlim(1e3,16e3)
+a1 = plt.subplot(212, sharex=a0)
 plt.plot(fftfreqs, dB(tgtmic_sensitivity))
 plt.xlabel('Frequency, Hz'); plt.ylabel('Sensitivity, dB a.u.rms/Pa')
-
+plt.xlim(1e3,16e3)
+plt.tight_layout()
 #%%
+# Calculating 'absolute' sensitivity
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Now to finally 'free' the current mic sensitivity from the actual recorder used 
 # we can use the data we have on the recording device to calculate the absolute
 # sensitivity in Vrms/Pa. This now allows us to connect the mic to any audio interface
@@ -213,11 +248,12 @@ plt.xlabel('Frequency, Hz'); plt.ylabel('Sensitivity, dB a.u.rms/Pa')
 # , and that too very flat at +/- 1 dB across the whole frequency range of ~0.05-20 kHz. 
 Vrms = 0.975*(tgtmic_sensitivity/(1/np.sqrt(2)))
 
-plt.figure()
+plt.figure(figsize=(7,9))
 a00 = plt.subplot(211)
+plt.title('Target mic: absolute sensitivity (Sennheiser MKH 416)')
 plt.plot(fftfreqs, Vrms)
-plt.hlines(25e-3*10**(-2.5/20),0,fftfreqs[-1], label='+2.5 dB')
-plt.hlines(25e-3*10**(2.5/20),0,fftfreqs[-1], label='-2.5 dB')
+plt.hlines(25e-3*10**(-2.5/20),0,fftfreqs[-1], 'k', label='+2.5 dB')
+plt.hlines(25e-3*10**(2.5/20),0,fftfreqs[-1], 'k',label='-2.5 dB')
 plt.hlines(25e-3,0,fftfreqs[-1], 'g', label='per manufac. specs')
 plt.ylabel('Mic output, Vrms', fontsize=12)
 plt.legend()
@@ -228,3 +264,4 @@ plt.hlines(dB(25e-3)-2.5,0,fftfreqs[-1])
 plt.hlines(dB(25e-3)+2.5,0,fftfreqs[-1])
 plt.hlines(dB(25e-3),0,fftfreqs[-1])
 plt.ylabel('Mic output, dB(Vrms) re 1', fontsize=12)
+plt.xlabel('Frequency, Hz')

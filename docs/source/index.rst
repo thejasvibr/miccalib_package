@@ -23,6 +23,11 @@ The 'examples' section shows you what can be done after the data has been collec
    :maxdepth: 2
    :caption: Contents:
 
+.. toctree::
+      :maxdepth: 4
+      :caption: Use Cases
+
+      gallery_examples/index.rst
 
 
 Indices and tables
