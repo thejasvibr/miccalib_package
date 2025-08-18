@@ -1,8 +1,6 @@
 matplotlib
-mpmath
 numpy
 pandas
-sympy
 scipy
 tqdm
 recommonmark 
