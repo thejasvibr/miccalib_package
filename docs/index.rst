@@ -13,6 +13,9 @@ Welcome to miccalib's documentation!
    authors
    history
 
+
+   gallery_examples/index.rst
+
 Indices and tables
 ==================
 * :ref:`genindex`

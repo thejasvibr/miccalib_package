@@ -19,6 +19,7 @@ based on Lena de Framond's translation of Kristian Beedlholm's MATLAB code.
 """
 import numpy as np 
 from scipy import fft
+import scipy.signal as signal 
 
 def deconvolve_linearchirp(audio, sweeprate, fs):
     '''
@@ -43,7 +44,7 @@ def deconvolve_linearchirp(audio, sweeprate, fs):
         the playback signal was detected in time.
     
     modu : np.array 
-        The inverted version of linear-chirp for convolution later.
+        Complex conjugate of the linear sweep.
   
     See Also
     --------
@@ -73,7 +74,7 @@ def convolve_linearchirp(modsig, modu):
     modsig : np.array
         The 'cleaned' impulse-response of the recording. 
     modu : np.array
-        The inverted linear-chirp to convolve the clean impulse-response with
+        Complex conjugate of the linear sweep
 
     Returns 
     -------
@@ -86,5 +87,64 @@ def convolve_linearchirp(modsig, modu):
     miccalib.deconvolution.deconvolve_linearchirp    
     '''
     G2 = fft.fft(modsig)
-    modsig2=np.real(fft.ifft(G2*np.flip(modu)))*2
+    #modsig2=np.real(fft.ifft(G2*np.flip(modu)))*2
+    modsig2=np.real(fft.ifft(G2*np.conjugate(modu)))*2
     return modsig2
+
+
+def eliminate_reflections_linchirp(audioclip, fs, linearsweep_props, **impuleresp_props):
+    '''
+    Eliminate reflections from a recording of a linear chirp playback
+    
+    Parameters
+    ----------
+    audioclip : (N,) np.array
+    fs : int >0
+        SAmplerate in Hz
+    linearsweep_props : dict
+        Dictionary with the following entries freq_start, freq_stop, sweep_duration.
+        freq_start, freq_stop: float>=0, Hz
+        sweep_duration : float >0, seconds
+    impuleresp_props : dict
+        A dictionary with parameters that control the peak finding and reverb-removal.
+            peak_threshold : 100>float>0, optional
+                The percentile threshold to define a peak after deconvolution to 
+                identify where all a linear sweep is detected. Defaults to 99.
+            min_interpeak_distance : float>0, optional
+                The minimum time-gap between two peaks in seconds. Defaults to
+                0.5e-3 seconds.
+            imp_resp_halfwidth : int>0, optional
+                The halfwidth of the top peak that is preserved. Defaults to 20 samples.
+    
+    Returns
+    -------
+    directpath_audioclip : (N,) np.array
+        A np.array with only the direct path        
+    (impulse_resp, inverted_sweep) : tuple
+        A tuple with the impulse response of the audio and the inverted sweep 
+        to be use to recover the original audio. 
+    '''
+    peak_thresh = impuleresp_props.get('peak_threshold', 99)
+    imp_resp_halfwidth = impuleresp_props.get('imp_resp_halfwidth',20)
+    min_interpeak_distance = impuleresp_props.get('min_interpeak_distance', 0.5e-3)
+    freq_start, freq_stop = linearsweep_props['freq_start'], linearsweep_props['freq_stop']
+    sweep_duration = linearsweep_props['sweep_duration']
+    samples_sweep = int(fs*sweep_duration)
+    sweep_rate = (freq_stop - freq_start)/sweep_duration
+    
+    impulse_resp, inverted_sweep = deconvolve_linearchirp(audioclip,
+                                                          sweep_rate,
+                                                                    fs)
+    peaks_IR, _ = signal.find_peaks(impulse_resp,
+                                    height=np.percentile(impulse_resp,peak_thresh),
+                                    distance=int(fs*min_interpeak_distance))
+
+    valid_samples = np.arange(peaks_IR[0]-imp_resp_halfwidth, peaks_IR[0]+imp_resp_halfwidth, )
+    cleaned_impulseresp = np.zeros(impulse_resp.size)
+    cleaned_impulseresp[valid_samples] = impulse_resp[valid_samples]
+    directpath_audioclip = convolve_linearchirp(cleaned_impulseresp,inverted_sweep )
+    
+    return directpath_audioclip, (impulse_resp, inverted_sweep)
+
+
+
