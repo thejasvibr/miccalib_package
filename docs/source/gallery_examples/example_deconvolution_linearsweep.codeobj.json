@@ -116,6 +116,24 @@
    "name": "read"
   }
  ],
+ "signal.butter": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "scipy.signal",
+   "module_short": "scipy.signal",
+   "name": "butter"
+  }
+ ],
+ "signal.filtfilt": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "scipy.signal",
+   "module_short": "scipy.signal",
+   "name": "filtfilt"
+  }
+ ],
  "signal.find_peaks": [
   {
    "is_class": false,

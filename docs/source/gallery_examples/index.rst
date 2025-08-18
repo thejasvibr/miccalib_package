@@ -28,6 +28,23 @@ Here are some examples for the :code:`miccalib` package
     </div>
 
 
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="The steps are as followin:     1. Remove reflections from both target and calibration mics     2. Align target and calibration mic audio and cut out only the playback sweep     3. Use the known spectral ??? from the calibration mic to calculate the sensitivity     of the target microphone     4. Test the target mic calibration using a &#x27;validation&#x27; playback sound.">
+
+.. only:: html
+
+  .. image:: /gallery_examples/images/thumb/sphx_glr_example_freqsensitivity_thumb.png
+    :alt:
+
+  :ref:`sphx_glr_gallery_examples_example_freqsensitivity.py`
+
+.. raw:: html
+
+      <div class="sphx-glr-thumbnail-title">Measure the frequency sensitivity of the target microphone</div>
+    </div>
+
+
 .. thumbnail-parent-div-close
 
 .. raw:: html
@@ -39,6 +56,7 @@ Here are some examples for the :code:`miccalib` package
    :hidden:
 
    /gallery_examples/example_deconvolution_linearsweep
+   /gallery_examples/example_freqsensitivity
 
 
 .. only:: html

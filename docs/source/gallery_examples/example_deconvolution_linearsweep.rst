@@ -24,7 +24,7 @@ Example runthrough deconvolution
 
 @author: Thejasvi
 
-.. GENERATED FROM PYTHON SOURCE LINES 9-47
+.. GENERATED FROM PYTHON SOURCE LINES 9-54
 
 .. code-block:: Python
 
@@ -44,9 +44,16 @@ Example runthrough deconvolution
     #t_start, t_stop = 8.895, 8.915 # 5 ms sweep
     #t_start, t_stop = 8.695, 8.710 # 3 ms sweep
 
-    audio, fs = sf.read(calibmic_rec,
+
+    b,a = signal.butter(1, 100/(fs*0.5), 'high')
+
+
+    audio_stereo, fs = sf.read(calibmic_rec,
                         start=int(fs*t_start), stop=int(fs*t_stop))
-    audio = audio[:,0]
+    audio_raw = audio_stereo[:,0]
+
+    audio = signal.filtfilt(b,a, audio_raw)
+
 
     freq_start, freq_stop = 15e3, 200
     sweep_duration = 7e-3
@@ -67,7 +74,7 @@ Example runthrough deconvolution
 
 
 
-.. GENERATED FROM PYTHON SOURCE LINES 48-66
+.. GENERATED FROM PYTHON SOURCE LINES 55-73
 
 .. code-block:: Python
 
