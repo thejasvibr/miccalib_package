@@ -1,0 +1,128 @@
+{
+ "convolve_linearchirp": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "miccalib.deconvolution",
+   "module_short": "miccalib.deconvolution",
+   "name": "convolve_linearchirp"
+  }
+ ],
+ "deconvolve_linearchirp": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "miccalib.deconvolution",
+   "module_short": "miccalib.deconvolution",
+   "name": "deconvolve_linearchirp"
+  }
+ ],
+ "np.arange": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "arange"
+  }
+ ],
+ "np.percentile": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "percentile"
+  }
+ ],
+ "np.tile": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "tile"
+  }
+ ],
+ "np.zeros": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "numpy",
+   "module_short": "numpy",
+   "name": "zeros"
+  }
+ ],
+ "os.path.join": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "os.path",
+   "module_short": "os.path",
+   "name": "join"
+  }
+ ],
+ "plt.figure": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "matplotlib.pyplot",
+   "module_short": "matplotlib.pyplot",
+   "name": "figure"
+  }
+ ],
+ "plt.plot": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "matplotlib.pyplot",
+   "module_short": "matplotlib.pyplot",
+   "name": "plot"
+  }
+ ],
+ "plt.specgram": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "matplotlib.pyplot",
+   "module_short": "matplotlib.pyplot",
+   "name": "specgram"
+  }
+ ],
+ "plt.subplot": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "matplotlib.pyplot",
+   "module_short": "matplotlib.pyplot",
+   "name": "subplot"
+  }
+ ],
+ "sf.info": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "soundfile",
+   "module_short": "soundfile",
+   "name": "info"
+  }
+ ],
+ "sf.read": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "soundfile",
+   "module_short": "soundfile",
+   "name": "read"
+  }
+ ],
+ "signal.find_peaks": [
+  {
+   "is_class": false,
+   "is_explicit": false,
+   "module": "scipy.signal",
+   "module_short": "scipy.signal",
+   "name": "find_peaks"
+  }
+ ]
+}

@@ -1,0 +1,11 @@
+matplotlib
+mpmath
+numpy
+pandas
+sympy
+scipy
+tqdm
+recommonmark 
+sphinx
+sphinx_gallery
+sphinx_rtd_theme
