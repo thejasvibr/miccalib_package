@@ -5,6 +5,7 @@ pandas
 scipy
 tqdm
 recommonmark 
+soundfile
 sphinx
 sphinx_gallery
 sphinx_rtd_theme
