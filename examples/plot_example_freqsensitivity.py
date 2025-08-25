@@ -12,14 +12,14 @@ The steps are as followin:
     of the target microphone
     4. Test the target mic calibration using a 'validation' playback sound.
 
-Data collected by Lena de Framond.
-
+Experiment design: TB, Data collected by Lena de Framond. Analysis workflow: TB, LdF
 """
 from miccalib.deconvolution import deconvolve_linearchirp
 from miccalib.deconvolution import convolve_linearchirp
 from miccalib.deconvolution import eliminate_reflections_linchirp
 from miccalib.utilities import cut_out_playback, make_linear_sweep, rms, dB
 import miccalib.sensitivity as sensitivity
+from miccalib.utilities import get_rms_from_fft
 
 import miccalib 
 import soundfile as sf
@@ -214,10 +214,10 @@ plt.title('Cleaned power spectrum - above 40 dBSPL and within sweep range')
 #%%
 # Since we know the sound pressure for each frequency band, we can calculate
 # the sensitivity of our target microphone too.
-
 fftfreqs, tgt_freqwiserms = sensitivity.calc_native_freqwise_rms(tgtmic_sweep_gaincomp,
                                                               fs)
 tgtmic_sensitivity = tgt_freqwiserms/calib_clean_powerspectrum
+
 
 #%%
 tgtmic_sensitivity[np.isinf(tgtmic_sensitivity)] = np.nan
@@ -234,6 +234,51 @@ plt.plot(fftfreqs, dB(tgtmic_sensitivity))
 plt.xlabel('Frequency, Hz'); plt.ylabel('Sensitivity, dB a.u.rms/Pa')
 plt.xlim(1e3,16e3)
 plt.tight_layout()
+#%% 
+# What is the absolute pressure in Pa or dB SPL?
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Knowing the sensitivity, let's calculate the received levels. 
+# sensitivity -> au rms/ Pa 
+# we want Parms = aurms x Pa/aurms
+
+# let's load up another sound snippet, and this time just quantify the received levels 'raw'
+calibmic_stereo_test, fs = sf.read(calibmic_rec,
+                    start=int(fs*17.276), stop=int(fs*17.296))
+calibmic_raw_test = calibmic_stereo_test[:,0]
+calib_test_sweep = cut_out_playback(calibmic_raw_test, linear_chirp)
+calib_test_sweep *= 10**(-calibmic_total_gain/20) # compensate for gain
+
+
+tgtmic_audio_stereo, fs = sf.read(tgt_mic_file,
+                           start=int(fs*23.174), stop=int(fs*23.196))
+tgtmic_audio_raw = tgtmic_audio_stereo[:,0]
+tgt_test_sweep = cut_out_playback(tgtmic_audio_raw, linear_chirp)
+tgt_test_sweep *= 10**(-tgtmic_totalgain/20) # compensate for gain
+
+plt.figure()
+aa = plt.subplot(311)
+plt.plot(calib_test_sweep, label='calib. mic');plt.plot(tgt_test_sweep, label='tgt mic')
+plt.legend()
+ab = plt.subplot(312)
+plt.specgram(calib_test_sweep, Fs=fs, NFFT=128, noverlap=120)
+ac = plt.subplot(313)
+plt.specgram(tgt_test_sweep, Fs=fs, NFFT=128, noverlap=120)
+
+# And now let's calculate the dB SPL from the calib mic
+fftfreqs, calibmic_sweep_freqrms = sensitivity.calc_native_freqwise_rms(calib_test_sweep,
+                                                              fs)
+calibmic_sweep_rmseq = get_rms_from_fft(fftfreqs, calibmic_sweep_freqrms, freq_range=[2e3,14e3] )
+calibmic_sweep_Parmseq = calibmic_sweep_rmseq/rms_per_Pa
+print(f'Calib {dB(calibmic_sweep_Parmseq/20e-6)} dB SPL re 20muPa rms')
+# And now using the sensitivity of the target mic
+
+tgt_fftfreqs, tgt_test_freqrms = sensitivity.calc_native_freqwise_rms(tgt_test_sweep,
+                                                              fs)
+tgt_test_freqParms = tgt_test_freqrms/tgtmic_sensitivity
+tgt_test_freqParms[np.isnan(tgt_test_freqParms)] = 0
+tgt_test_overallParms = get_rms_from_fft(tgt_fftfreqs, tgt_test_freqParms, freq_range=[2e3,14e3] )
+print(f'Target {dB(tgt_test_overallParms/20e-6)} dB SPL re 20muPa rms')
+
 #%%
 # Calculating 'absolute' sensitivity
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

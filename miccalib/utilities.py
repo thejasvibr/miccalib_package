@@ -169,6 +169,33 @@ def maxnorm_powerspec(X, **kwargs):
     spectrum -= np.max(spectrum)
     return fftfreqs, spectrum
 
+# bin width clarification https://stackoverflow.com/questions/10754549/fft-bin-width-clarification
+def get_rms_from_fft(freqs, spectrum, **kwargs):
+    '''Use Parseval's theorem to get the RMS level of each frequency component
+    This only works for RFFT spectrums!!!
+    
+    Parameters
+    ----------
+    freqs : (Nfreqs,) np.array >0 values
+    spectrum : (Nfreqs,) np.array (complex)
+    freq_range : (2,) array-like
+        Min and max values
+    
+    Returns 
+    -------
+    root_mean_squared : float
+        The RMS of the signal within the min-max frequency range
+   
+    '''
+    minfreq, maxfreq = kwargs['freq_range']
+    relevant_freqs = np.logical_and(freqs>=minfreq, freqs<=maxfreq)
+    spectrum_copy = spectrum.copy()
+    spectrum_copy[~relevant_freqs] = 0
+    if np.any(np.iscomplex(spectrum_copy)):
+        raise ValueError('Complex spectral power detected -  invalid input. ')
+    root_mean_squared = np.sqrt(np.sum(spectrum_copy**2))
+    return root_mean_squared
+
 
 def rms(X):
     return np.sqrt(np.mean(X**2))
