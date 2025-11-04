@@ -23,7 +23,10 @@ config_file_path = '.\calib_experiment_file.csv'
 
 
 
-
+## Perform a local install  (for now)
+* Clone the repo
+* ```cd``` to the repo
+* Do a local install with ```pip install -e .```
 
 
 
